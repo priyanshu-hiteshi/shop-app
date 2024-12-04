@@ -21,10 +21,22 @@ class _ProductCardState extends State<ProductCard> {
             : widget.product.description;
 
     return ListTile(
-      leading: FadeInImage.assetNetwork(
-            placeholder: 'Loading...',
-            image: widget.product.thumbnail,
-          ),
+      leading: Image.network(
+        widget.product.thumbnail,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress != null) {
+            return Container(
+                height: 40,
+                width: 40,
+                alignment: Alignment.center,
+                child: CircularProgressIndicator());
+          }
+          return child;
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(Icons.error);
+        },
+      ),
       title: Text(widget.product.title),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,9 +58,9 @@ class _ProductCardState extends State<ProductCard> {
         ],
       ),
       trailing: Text(
-          "\$${widget.product.price.toStringAsFixed(2)}" , style: TextStyle(
-            color: Colors.green 
-          ),), // Format price to two decimal places
+        "\$${widget.product.price.toStringAsFixed(2)}",
+        style: TextStyle(color: Colors.green),
+      ), // Format price to two decimal places
     );
   }
 }

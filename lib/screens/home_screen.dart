@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../widgets/product_card.dart';
 import '../services/api_service.dart';
 import '../models/product_model.dart';
-import './asset.dart'; 
+import './asset.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -49,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ProductCard(product: product),
               );
             },
+            physics: BouncingScrollPhysics(),
           );
         },
       ),
@@ -56,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const NextScreen()),
+            MaterialPageRoute(builder: (context) => const Cart()),
           );
         },
         backgroundColor: Colors.white,
