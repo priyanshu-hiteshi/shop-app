@@ -15,6 +15,7 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
+    context.findRenderObject();
     String descriptionText =
         widget.product.description.length < 60 && !isExpanded
             ? widget.product.description.substring(0, 60) + "... "

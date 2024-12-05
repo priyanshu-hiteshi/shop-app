@@ -19,6 +19,8 @@ class _CartState extends State<Cart> {
 
   // Function to show the bottom sheet
   void _showReviewBottomSheet() {
+    // Navigator.of(context).pop();
+
     showModalBottomSheet(
       context: context,
       builder: (context) {

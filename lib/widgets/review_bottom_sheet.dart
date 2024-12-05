@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../provider/review_provider.dart'; // Import your ReviewProvider
 
 class ReviewBottomSheet extends StatefulWidget {
   const ReviewBottomSheet({super.key});
@@ -11,48 +12,34 @@ class ReviewBottomSheet extends StatefulWidget {
 class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
   final TextEditingController reviewController = TextEditingController();
 
+  String? errorMessage; // To store validation message
+
   @override
   void initState() {
     super.initState();
-    _loadReviews();
-  }
-
-  List<String> reviews = [];
-  Future<void> _loadReviews() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      reviews = prefs.getStringList('reviews') ?? [];
+    // Load reviews when the bottom sheet is opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ReviewProvider>(context, listen: false).loadReviews();
     });
-  }
-
-  Future<void> _saveReviews() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('reviews', reviews);
-    setState(() {});
-  }
-
-  Future<void> _deleteReview(int index) async {
-    reviews.removeAt(index);
-
-    await _saveReviews();
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final reviewModel = Provider.of<ReviewProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min, // Use min size for bottom sheet
         children: [
-          Text(
+          const Text(
             'Reviews',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 10), // Space between title and review list
           Expanded(
             child: ListView.builder(
-              itemCount: reviews.length,
+              itemCount: reviewModel.reviews.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
@@ -61,13 +48,14 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${index + 1}. ${reviews[index]}',
+                          '${index + 1}. ${reviewModel.reviews[index]}',
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
                       IconButton(
-                        onPressed: () async {
-                          await _deleteReview(index); // Delete review
+                        onPressed: () {
+                          reviewModel.deleteReview(
+                              index); // Delete review using provider
                         },
                         icon: const Icon(Icons.delete, color: Colors.red),
                       ),
@@ -77,23 +65,30 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
               },
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(
+              height: 10), // Space between review list and input field
           TextField(
             controller: reviewController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Enter your review',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              errorText: errorMessage, // Use errorText for inline validation
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 18), // Space between text field and button
           ElevatedButton(
-            onPressed: () async {
-              if (reviewController.text.isNotEmpty) {
-                reviews.add(reviewController.text); // Add new review
-                await _saveReviews();
+            onPressed: () {
+              if (reviewController.text.isEmpty) {
+                setState(() {
+                  errorMessage = 'Review cannot be empty'; // Show error message
+                });
+              } else {
+                setState(() {
+                  errorMessage = null; // Clear error message
+                  reviewModel.addReview(
+                      reviewController.text); // Add new review using provider
+                });
                 reviewController.clear(); // Clear the input field
-
-                // Navigator.pop(context); // Close the bottom sheet
               }
             },
             style: ElevatedButton.styleFrom(

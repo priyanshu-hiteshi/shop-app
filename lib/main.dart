@@ -1,10 +1,17 @@
-// main.dart
-
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'provider/review_provider.dart'; // Import your ReviewProvider
+import 'screens/home_screen.dart'; // Adjust this import as necessary
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ReviewProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -19,7 +26,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
         cardColor: Colors.black87,
       ),
-      home: const HomeScreen(),
+      home: const HomeScreen(), // Adjust this to your main screen
     );
   }
 }
