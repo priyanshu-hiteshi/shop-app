@@ -25,7 +25,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final reviewModel = Provider.of<ReviewProvider>(context);
+    final reviewProvider = Provider.of<ReviewProvider>(context);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -39,7 +39,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
           const SizedBox(height: 10), // Space between title and review list
           Expanded(
             child: ListView.builder(
-              itemCount: reviewModel.reviews.length,
+              itemCount: reviewProvider.reviews.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
@@ -48,14 +48,15 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${index + 1}. ${reviewModel.reviews[index]}',
+                          '${index + 1}. ${reviewProvider.reviews[index]}',
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
                       IconButton(
-                        onPressed: () {
-                          reviewModel.deleteReview(
-                              index); // Delete review using provider
+                        onPressed: () async {
+                          // Delete review using the updated provider method
+                          await reviewProvider
+                              .deleteReview(reviewProvider.reviews[index]);
                         },
                         icon: const Icon(Icons.delete, color: Colors.red),
                       ),
@@ -77,18 +78,22 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
           ),
           const SizedBox(height: 18), // Space between text field and button
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (reviewController.text.isEmpty) {
                 setState(() {
                   errorMessage = 'Review cannot be empty'; // Show error message
                 });
               } else {
+                final newReview = reviewController.text;
+
+                // Perform the async operation outside setState
+                await reviewProvider.addReview(newReview);
+
+                // Clear the input field and reset the error message in setState
                 setState(() {
                   errorMessage = null; // Clear error message
-                  reviewModel.addReview(
-                      reviewController.text); // Add new review using provider
+                  reviewController.clear(); // Clear the input field
                 });
-                reviewController.clear(); // Clear the input field
               }
             },
             style: ElevatedButton.styleFrom(

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'provider/review_provider.dart'; // Import your ReviewProvider
+import 'storage/shared_preference_storage.dart';
 import 'screens/home_screen.dart'; // Adjust this import as necessary
 
 void main() {
+  // Initialize your concrete storage implementation
+  final sharedPreferencesStorage = SharedPreferencesStorage();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ReviewProvider()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ReviewProvider(storage: sharedPreferencesStorage),
+        ),
       ],
       child: const MyApp(),
     ),

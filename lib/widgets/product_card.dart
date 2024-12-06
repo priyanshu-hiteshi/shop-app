@@ -47,11 +47,11 @@ class _ProductCardState extends State<ProductCard> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  isExpanded = true;
+                  isExpanded = !isExpanded;
                 });
               },
               child: Text(
-                "Read more",
+                isExpanded ? "Read less" : "Read more",
                 style: TextStyle(
                     color: Colors.blue), // Optional styling for the link
               ),
