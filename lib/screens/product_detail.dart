@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:my_ecom/screens/cart.dart';
 import 'package:my_ecom/widgets/review_bottom_sheet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_ecom/provider/cart_provider.dart'; // Import CartProvider
 import '../models/product_model.dart'; // Import the product model
 
 class Detail extends StatefulWidget {
@@ -64,7 +66,7 @@ class _CartState extends State<Detail> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping Cart'),
+        title: const Text('Product Details'),
       ),
       body: Center(
         child: Container(
@@ -152,7 +154,19 @@ class _CartState extends State<Detail> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            // Add your add-to-cart logic here
+                            // Add product to cart
+                            final cartProvider = Provider.of<CartProvider>(
+                                context,
+                                listen: false);
+                            cartProvider.addToCart(widget.product);
+
+                            // Optionally, show a snackbar or navigate to the cart
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    '${widget.product.title} added to cart'),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(
@@ -185,7 +199,6 @@ class _CartState extends State<Detail> {
             backgroundColor: Colors.black,
             child: const Icon(Icons.add_comment, color: Colors.white),
           ),
-          // const SizedBox(height: 1), // Add some space between button and text
           const Text(
             'Reviews',
             style: TextStyle(

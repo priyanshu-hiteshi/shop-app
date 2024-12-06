@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_ecom/provider/cart_provider.dart';
 import 'package:provider/provider.dart';
 import 'provider/review_provider.dart'; // Import your ReviewProvider
 import 'storage/shared_preference_storage.dart';
@@ -15,6 +16,7 @@ void main() {
           create: (context) =>
               ReviewProvider(storage: sharedPreferencesStorage),
         ),
+        ChangeNotifierProvider(create: (context) => CartProvider()),
       ],
       child: const MyApp(),
     ),
