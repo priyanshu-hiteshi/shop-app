@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/product_card.dart';
 import '../services/api_service.dart';
 import '../models/product_model.dart';
-import '../screens/asset.dart'; // Import Cart screen
+import 'product_detail.dart'; // Import Cart screen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Cart(product: product),
+                        builder: (context) => Detail(product: product),
                       ),
                     );
                   },

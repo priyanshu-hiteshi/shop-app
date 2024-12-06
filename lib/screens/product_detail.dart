@@ -3,16 +3,16 @@ import 'package:my_ecom/widgets/review_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product_model.dart'; // Import the product model
 
-class Cart extends StatefulWidget {
+class Detail extends StatefulWidget {
   final Product product; // Accept product as a parameter
 
-  const Cart({Key? key, required this.product}) : super(key: key);
+  const Detail({Key? key, required this.product}) : super(key: key);
 
   @override
-  State<Cart> createState() => _CartState();
+  State<Detail> createState() => _CartState();
 }
 
-class _CartState extends State<Cart> {
+class _CartState extends State<Detail> {
   // Function to show the bottom sheet
   void _showReviewBottomSheet() {
     showModalBottomSheet(
