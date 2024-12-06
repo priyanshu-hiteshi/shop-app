@@ -1,113 +1,103 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../provider/review_provider.dart'; // Import your ReviewProvider
+import 'package:intl/intl.dart';
+import '../models/product_model.dart'; // Import the Review model
 
-class ReviewBottomSheet extends StatefulWidget {
-  const ReviewBottomSheet({super.key});
+class ReviewBottomSheet extends StatelessWidget {
+  final List<Review> reviews; // Accept reviews as a parameter
 
-  @override
-  State<ReviewBottomSheet> createState() => _ReviewBottomSheetState();
-}
+  const ReviewBottomSheet({Key? key, required this.reviews}) : super(key: key);
 
-class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
-  final TextEditingController reviewController = TextEditingController();
-
-  String? errorMessage; // To store validation message
-
-  @override
-  void initState() {
-    super.initState();
-    // Load reviews when the bottom sheet is opened
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ReviewProvider>(context, listen: false).loadReviews();
-    });
+  String formatDate(String dateString) {
+    final DateTime date = DateTime.parse(dateString);
+    return DateFormat('MMM dd, yyyy hh:mm a')
+        .format(date); // Format date & time
   }
 
   @override
   Widget build(BuildContext context) {
-    final reviewProvider = Provider.of<ReviewProvider>(context);
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Use min size for bottom sheet
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Reviews',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10), // Space between title and review list
+          const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              itemCount: reviewProvider.reviews.length,
+              itemCount: reviews.length,
               itemBuilder: (context, index) {
+                final review = reviews[index];
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${index + 1}. ${reviewProvider.reviews[index]}',
-                          style: const TextStyle(color: Colors.white),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(
+                          255, 22, 22, 22), // Background color
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey, // Border color
+                        width: 1.5, // Border width
+                        style: BorderStyle
+                            .solid, // Border style (solid, dashed, etc.)
+                      ), // Border radius
+                    ),
+                    padding: const EdgeInsets.all(
+                        12.0), // Padding inside the container
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Display email and formatted date
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              review.reviewerName,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color.fromARGB(255, 211, 209, 209),
+                              ),
+                            ),
+                            Text(
+                              formatDate(review.date),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          // Delete review using the updated provider method
-                          await reviewProvider
-                              .deleteReview(reviewProvider.reviews[index]);
-                        },
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        // Display the review comment
+                        Text(
+                          review.comment,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Display star ratings
+                        Row(
+                          children: List.generate(5, (starIndex) {
+                            return Icon(
+                              starIndex < review.rating
+                                  ? Icons.star
+                                  : Icons
+                                      .star_border, // Filled or outlined star
+                              color: Colors.amber, // Star color
+                              size: 16, // Star size
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
-            ),
-          ),
-          const SizedBox(
-              height: 10), // Space between review list and input field
-          TextField(
-            controller: reviewController,
-            decoration: InputDecoration(
-              labelText: 'Enter your review',
-              border: const OutlineInputBorder(),
-              errorText: errorMessage, // Use errorText for inline validation
-            ),
-          ),
-          const SizedBox(height: 18), // Space between text field and button
-          ElevatedButton(
-            onPressed: () async {
-              if (reviewController.text.isEmpty) {
-                setState(() {
-                  errorMessage = 'Review cannot be empty'; // Show error message
-                });
-              } else {
-                final newReview = reviewController.text;
-
-                // Perform the async operation outside setState
-                await reviewProvider.addReview(newReview);
-
-                // Clear the input field and reset the error message in setState
-                setState(() {
-                  errorMessage = null; // Clear error message
-                  reviewController.clear(); // Clear the input field
-                });
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 116, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Submit Review',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
         ],

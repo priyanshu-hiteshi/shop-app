@@ -1,44 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:my_ecom/widgets/review_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/product_model.dart'; // Import the product model
 
 class Cart extends StatefulWidget {
-  const Cart({super.key});
+  final Product product; // Accept product as a parameter
+
+  const Cart({Key? key, required this.product}) : super(key: key);
 
   @override
   State<Cart> createState() => _CartState();
 }
 
 class _CartState extends State<Cart> {
-  // Dummy product data
-  final String imageUrl =
-      'https://www.apple.com/newsroom/images/product/mac/standard/Apple_MacBook-Pro_14-16-inch_10182021_big.jpg.large.jpg'; // Product image URL
-  final String description = 'This is a great product that you will love!';
-  final String title = 'Mac book pro.';
-  final double price = 29.99;
-
   // Function to show the bottom sheet
   void _showReviewBottomSheet() {
-    // Navigator.of(context).pop();
-
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return const ReviewBottomSheet();
+        return ReviewBottomSheet(
+          reviews: widget.product.reviews ?? [], // Pass reviews here
+        );
       },
     );
   }
 
+  // Calculate the average rating based on reviews
+  double calculateAverageRating() {
+    if (widget.product.reviews == null || widget.product.reviews!.isEmpty) {
+      return 0.0;
+    }
+    double totalRating = 0.0;
+
+    for (var review in widget.product.reviews!) {
+      totalRating +=
+          review.rating ?? 0.0; // Access the 'rating' property directly
+    }
+
+    return totalRating / widget.product.reviews!.length;
+  }
+
+  // Get the number of full stars based on the average rating
+  int getFullStars(double averageRating) {
+    return averageRating.floor();
+  }
+
+  // Get the number of half stars based on the decimal part of the average rating
+  bool hasHalfStar(double averageRating) {
+    return averageRating - averageRating.floor() >= 0.5;
+  }
+
+  // Get the number of empty stars based on the full and half stars
+  int getEmptyStars(double averageRating) {
+    return 5 -
+        getFullStars(averageRating) -
+        (hasHalfStar(averageRating) ? 1 : 0);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Calculate the average rating for the product
+    double averageRating = calculateAverageRating();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping Cart'),
       ),
       body: Center(
         child: Container(
-          width: 300,
-          height: 350,
+          width: 350,
+          height: 380,
           margin: const EdgeInsets.all(16.0),
           child: Card(
             elevation: 4,
@@ -46,11 +77,13 @@ class _CartState extends State<Cart> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Display product image
                 Container(
+                  padding: const EdgeInsets.all(12.0),
                   height: 150,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage(imageUrl),
+                      image: NetworkImage(widget.product.images![0]),
                       fit: BoxFit.cover,
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -59,7 +92,7 @@ class _CartState extends State<Cart> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    title,
+                    widget.product.title, // Display product title
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black,
@@ -69,19 +102,73 @@ class _CartState extends State<Cart> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    description,
-                    style: const TextStyle(fontSize: 16, color: Colors.black),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Text(
+                      widget.product.description, // Display product description
+                      textAlign: TextAlign.justify,
+                      style: const TextStyle(
+                          fontSize: 12, color: Color.fromARGB(255, 67, 67, 67)),
+                    ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    '\$${price.toStringAsFixed(2)}',
+                    '\$${widget.product.price.toStringAsFixed(2)}', // Display product price
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Container(
+                    margin:
+                        const EdgeInsets.only(top: 8.0), // Add top margin here
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceBetween, // Space between elements
+                      children: [
+                        Row(
+                          children: [
+                            // Display stars based on average rating
+                            for (int i = 0;
+                                i < getFullStars(averageRating);
+                                i++)
+                              const Icon(Icons.star,
+                                  size: 18.0, color: Colors.amber),
+                            if (hasHalfStar(averageRating))
+                              const Icon(Icons.star_half,
+                                  size: 18.0, color: Colors.amber),
+                            for (int i = 0;
+                                i < getEmptyStars(averageRating);
+                                i++)
+                              const Icon(Icons.star_border,
+                                  size: 18.0, color: Colors.amber),
+                          ],
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Add your add-to-cart logic here
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                  255, 233, 210, 2), // Button color
+                              foregroundColor: Colors.black, // Text color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14.0),
+                              )),
+                          child: const Text(
+                            'Add to Cart',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 ),
@@ -90,10 +177,23 @@ class _CartState extends State<Cart> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showReviewBottomSheet,
-        backgroundColor: Colors.black,
-        child: const Icon(Icons.add_comment, color: Colors.white),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _showReviewBottomSheet,
+            backgroundColor: Colors.black,
+            child: const Icon(Icons.add_comment, color: Colors.white),
+          ),
+          // const SizedBox(height: 1), // Add some space between button and text
+          const Text(
+            'Reviews',
+            style: TextStyle(
+              color: Color.fromARGB(255, 165, 164, 164),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

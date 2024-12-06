@@ -1,10 +1,8 @@
-// screens/home_screen.dart
-
 import 'package:flutter/material.dart';
 import '../widgets/product_card.dart';
 import '../services/api_service.dart';
 import '../models/product_model.dart';
-import './asset.dart';
+import '../screens/asset.dart'; // Import Cart screen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -46,22 +44,23 @@ class _HomeScreenState extends State<HomeScreen> {
               final product = snapshot.data![index];
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ProductCard(product: product),
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to Cart screen with selected product
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Cart(product: product),
+                      ),
+                    );
+                  },
+                  child: ProductCard(product: product),
+                ),
               );
             },
             physics: BouncingScrollPhysics(),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Cart()),
-          );
-        },
-        backgroundColor: Colors.white,
-        child: const Icon(Icons.arrow_forward, color: Colors.black),
       ),
     );
   }
